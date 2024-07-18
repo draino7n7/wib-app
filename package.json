@@ -4,10 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --configuration production --base-href /wib-app/ && cp src/CNAME dist/your-project-name/CNAME",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:wib-app": "node dist/wib-app/server/server.mjs"
+    "serve:ssr:wib-app": "node dist/wib-app/server/server.mjs",
+    "deploy": "npx angular-cli-ghpages --dir=dist/your-project-name"
   },
   "private": true,
   "dependencies": {
