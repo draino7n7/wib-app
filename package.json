@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --configuration production --base-href /wib-app/ && copy src\\CNAME dist\\wib-app\\CNAME",
+    "build": "ng build --configuration production --base-href / && copy src\\CNAME dist\\wib-app\\CNAME",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:wib-app": "node dist/wib-app/server/server.mjs",
