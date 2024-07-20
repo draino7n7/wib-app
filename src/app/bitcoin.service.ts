@@ -5,7 +5,8 @@ import axios from 'axios';
   providedIn: 'root'
 })
 export class BitcoinService {
-  private historicalApiUrl = '/api/trades.csv?symbol=bitstampUSD';
+  //private historicalApiUrl = '/api/trades.csv?symbol=bitstampUSD';
+  private historicalApiUrl = 'http://api.bitcoincharts.com/v1/trades.csv?symbol=bitstampUSD';
 
   constructor() {}
 
