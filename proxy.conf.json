@@ -1,0 +1,11 @@
+{
+    "/api": {
+      "target": "http://api.bitcoincharts.com/v1",
+      "secure": false,
+      "changeOrigin": true,
+      "pathRewrite": {
+        "^/api": ""
+      }
+    }
+  }
+  
