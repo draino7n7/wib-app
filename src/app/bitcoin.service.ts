@@ -1,20 +1,21 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
+import { environment } from '../environments/environment'; // Adjust the import path if necessary
 
 @Injectable({
   providedIn: 'root'
 })
 export class BitcoinService {
-  //private historicalApiUrl = '/api/trades.csv?symbol=bitstampUSD';
-  private historicalApiUrl = 'http://api.bitcoincharts.com/v1/trades.csv?symbol=bitstampUSD';
+  private historicalApiUrl = `${environment.apiUrl}/api/bitcoin/historical`;
+  private currentApiUrl = `${environment.apiUrl}/api/bitcoin/current`;
 
   constructor() {}
 
   async getHistoricalData(): Promise<any[]> {
     try {
       const response = await axios.get(this.historicalApiUrl);
-      console.log('Raw CSV Data:', response.data); // Log raw CSV data
-      return this.csvToJson(response.data);
+      console.log('API Response Data:', response.data); // Log raw data
+      return response.data; // Directly return JSON data
     } catch (error) {
       console.error('Error fetching historical data:', error);
       throw error;
@@ -23,29 +24,11 @@ export class BitcoinService {
 
   async getCurrentPrice(): Promise<number> {
     try {
-      const response = await axios.get('https://api.coindesk.com/v1/bpi/currentprice/BTC.json');
-      const currentPrice = response.data.bpi.USD.rate_float;
-      return currentPrice;
+      const response = await axios.get(this.currentApiUrl);
+      return response.data.currentPrice;
     } catch (error) {
       console.error('Error fetching current price:', error);
       throw error;
     }
-  }
-
-  private csvToJson(csv: string): any[] {
-    const lines = csv.split('\n');
-    const result = [];
-
-    for (let i = 0; i < lines.length; i++) {
-      const currentline = lines[i].split(',');
-      if (currentline.length >= 3) {
-        result.push({
-          timestamp: parseInt(currentline[0]),
-          price: parseFloat(currentline[1]),
-          volume: parseFloat(currentline[2])
-        });
-      }
-    }
-    return result;
   }
 }

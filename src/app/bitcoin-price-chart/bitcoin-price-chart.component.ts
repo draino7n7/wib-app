@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { BitcoinService } from '../bitcoin.service';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import { subDays } from 'date-fns';
 
 @Component({
   selector: 'app-bitcoin-price-chart',
@@ -36,8 +35,8 @@ export class BitcoinPriceChartComponent implements OnInit {
 
   renderChart(): void {
     const ctx = document.getElementById('priceChart') as HTMLCanvasElement;
-    const prices = this.historicalData.map(data => data.price);
-    const dates = this.historicalData.map(data => new Date(data.timestamp * 1000));
+    const prices = this.historicalData.map(data => data.close); // Use 'close' for daily closing prices
+    const dates = this.historicalData.map(data => new Date(data.date));
 
     console.log('Prices:', prices);
     console.log('Dates:', dates);
@@ -75,10 +74,10 @@ export class BitcoinPriceChartComponent implements OnInit {
           x: {
             type: 'time',
             time: {
-              unit: 'hour',
-              tooltipFormat: 'MMM dd, yyyy HH:mm',
+              unit: 'day',
+              tooltipFormat: 'MMM dd, yyyy',
               displayFormats: {
-                hour: 'MMM dd, yyyy HH:mm'
+                day: 'MMM dd, yyyy'
               }
             },
             title: {
@@ -87,7 +86,7 @@ export class BitcoinPriceChartComponent implements OnInit {
             },
             ticks: {
               autoSkip: true,
-              maxTicksLimit: 24
+              maxTicksLimit: 30
             }
           },
           'y-left': {
