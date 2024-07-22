@@ -2,7 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BitcoinService } from '../bitcoin.service';
 import { Chart, registerables } from 'chart.js';
+import 'chartjs-chart-financial';
+import { CandlestickController, CandlestickElement, OhlcController, OhlcElement } from 'chartjs-chart-financial';
 import 'chartjs-adapter-date-fns';
+
+Chart.register(...registerables, CandlestickController, CandlestickElement, OhlcController, OhlcElement);
 
 @Component({
   selector: 'app-bitcoin-price-chart',
@@ -15,9 +19,7 @@ export class BitcoinPriceChartComponent implements OnInit {
   currentPrice: number = 0;
   historicalData: any[] = [];
 
-  constructor(private bitcoinService: BitcoinService) {
-    Chart.register(...registerables);
-  }
+  constructor(private bitcoinService: BitcoinService) {}
 
   async ngOnInit(): Promise<void> {
     try {
@@ -25,7 +27,7 @@ export class BitcoinPriceChartComponent implements OnInit {
       console.log('Current Price:', this.currentPrice);
 
       this.historicalData = await this.bitcoinService.getHistoricalData();
-      console.log('Historical Data:', this.historicalData); // Log historical data
+      console.log('Historical Data:', this.historicalData);
 
       this.renderChart();
     } catch (error) {
@@ -35,38 +37,32 @@ export class BitcoinPriceChartComponent implements OnInit {
 
   renderChart(): void {
     const ctx = document.getElementById('priceChart') as HTMLCanvasElement;
-    const prices = this.historicalData.map(data => data.close); // Use 'close' for daily closing prices
-    const dates = this.historicalData.map(data => new Date(data.date));
 
-    console.log('Prices:', prices);
-    console.log('Dates:', dates);
+    if (!ctx) {
+      console.error('Could not find the canvas element with id "priceChart"');
+      return;
+    }
 
-    const minDate = Math.min(...dates.map(date => date.getTime()));
-    const maxDate = Math.max(...dates.map(date => date.getTime()));
+    const financialData = this.historicalData.map(data => ({
+      x: new Date(data.date),
+      o: data.open,
+      h: data.high,
+      l: data.low,
+      c: data.close
+    }));
 
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    const paddedMinPrice = minPrice;
-    const paddedMaxPrice = maxPrice;
-
-    console.log('Min Date:', new Date(minDate));
-    console.log('Max Date:', new Date(maxDate));
-    console.log('Min Price:', minPrice);
-    console.log('Max Price:', maxPrice);
-    console.log('Padded Min Price:', paddedMinPrice);
-    console.log('Padded Max Price:', paddedMaxPrice);
+    console.log('Financial Data:', financialData);
 
     new Chart(ctx, {
-      type: 'line',
+      type: 'candlestick',
       data: {
-        labels: dates,
         datasets: [{
           label: 'Bitcoin Price (USD)',
-          data: prices,
-          borderColor: 'rgba(75, 192, 192, 1)',
+          data: financialData,
+          borderColor: 'rgba(0, 0, 0, 1)',
           borderWidth: 1,
-          fill: false,
-          yAxisID: 'y-left'
+          barPercentage: 0.4, // Adjust barPercentage to control the width of the candlesticks
+          categoryPercentage: 0.4 // Adjust categoryPercentage to control the spacing between candlesticks
         }]
       },
       options: {
@@ -85,34 +81,33 @@ export class BitcoinPriceChartComponent implements OnInit {
               text: 'Date'
             },
             ticks: {
-              autoSkip: true,
-              maxTicksLimit: 30
+              maxTicksLimit: 30,
+              source: 'auto'
             }
           },
-          'y-left': {
+          y: {
             type: 'linear',
             position: 'left',
-            min: paddedMinPrice,
-            max: paddedMaxPrice,
             title: {
               display: true,
               text: 'Price (USD)'
-            }
-          },
-          'y-right': {
-            type: 'linear',
-            position: 'right',
-            min: paddedMinPrice,
-            max: paddedMaxPrice,
-            grid: {
-              drawOnChartArea: false // only want the grid lines for one axis
             },
-            title: {
-              display: true,
-              text: 'Price (USD)'
-            }
+            min: Math.min(...financialData.map(d => d.l)) - 1000,
+            max: Math.max(...financialData.map(d => d.h)) + 1000
           }
-        }
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
       }
     });
   }

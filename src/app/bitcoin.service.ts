@@ -11,9 +11,28 @@ export class BitcoinService {
 
   constructor() {}
 
-  async getHistoricalData(): Promise<any[]> {
+  async getHistoricalData(start?: string, end?: string, interval?: string): Promise<any[]> {
     try {
-      const response = await axios.get(this.historicalApiUrl);
+      // Default values
+      const defaultStart = new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0];
+      const defaultEnd = new Date().toISOString().split('T')[0];
+      const defaultInterval = '1d';
+
+      // Use provided values or defaults
+      const queryStart = start || defaultStart;
+      const queryEnd = end || defaultEnd;
+      const queryInterval = interval || defaultInterval;
+
+      // Ensure the interval is valid
+      const validIntervals = ['1d', '1wk', '1mo'];
+      if (!validIntervals.includes(queryInterval)) {
+        throw new Error(`Invalid interval. Valid intervals are: ${validIntervals.join(', ')}`);
+      }
+
+      // Construct query string
+      const queryParams = `?start=${queryStart}&end=${queryEnd}&interval=${queryInterval}`;
+
+      const response = await axios.get(`${this.historicalApiUrl}${queryParams}`);
       console.log('API Response Data:', response.data); // Log raw data
       return response.data; // Directly return JSON data
     } catch (error) {

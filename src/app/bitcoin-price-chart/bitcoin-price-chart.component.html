@@ -1,6 +1,7 @@
-<div>
-    <h1>Bitcoin Price Chart</h1>
-    <h2>Current Bitcoin Price: {{ currentPrice | currency:'USD' }}</h2>
+<div style="height: 100%; display: flex; flex-direction: column;">
+  <h1>Bitcoin Price Chart</h1>
+  <h2>Current Bitcoin Price: {{ currentPrice | currency:'USD' }}</h2>
+  <div class="chart-container">
     <canvas id="priceChart"></canvas>
   </div>
-  
+</div>
